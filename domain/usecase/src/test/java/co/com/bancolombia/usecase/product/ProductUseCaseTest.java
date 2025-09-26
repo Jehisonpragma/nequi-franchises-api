@@ -10,6 +10,8 @@ import org.mockito.Mock;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -32,20 +34,20 @@ class ProductUseCaseTest {
         Integer branchId = 1;
         Integer stock = 20;
 
-        ProductModel incomingProductModel = ProductModel.builder().name(productName).build();
-        ProductModel outcommingProductModel = ProductModel.builder().productId(1).branchId(branchId).name(productName).build();
+        ProductModel outcommingProductModel = ProductModel.builder().productId(1).branchId(branchId).name(productName).stock(stock).build();
 
-        when(productModelRepository.createProduct(incomingProductModel)).thenReturn(Mono.just(outcommingProductModel));
+        when(productModelRepository.saveProduct(any(ProductModel.class))).thenReturn(Mono.just(outcommingProductModel));
 
         Mono<ProductModel> result = productUseCase.createProduct(productName, branchId,stock);
 
         StepVerifier.create(result)
+                .expectSubscription()
                 .expectNextMatches(productModel ->
                         productModel.getName().equals(productName) &&
-                                productModel.getBranchId().equals(branchId) &&
-                                productModel.getStock().equals(stock)
+                        productModel.getBranchId().equals(branchId) &&
+                        productModel.getStock().equals(stock)
                 )
-                .expectNextCount(0);
+                .expectNextCount(0).expectComplete().verify();
     }
 
 
@@ -63,5 +65,30 @@ class ProductUseCaseTest {
                     Assertions.assertTrue( response);
                     return true;
                 }).expectComplete().verify();
+    }
+
+    @Test
+    void testModifyStockInProduct() {
+        String productName = "Product1";
+        Integer productId = 1;
+        Integer branchId = 2;
+        Integer stock = 20;
+
+        ProductModel productModel = ProductModel.builder().productId(1).branchId(branchId).name(productName).stock(stock).build();
+
+        when(productModelRepository.getProductById(productId)).thenReturn(Mono.just(productModel));
+        when(productModelRepository.saveProduct(productModel)).thenReturn(Mono.just(productModel));
+
+        Mono<ProductModel> result = productUseCase.modifyStockInProduct(productId,stock);
+
+        StepVerifier.create(result)
+                .expectSubscription()
+                .expectNextMatches(productModelResponse ->
+                        productModelResponse.getProductId().equals(productId) &&
+                        productModelResponse.getName().equals(productName) &&
+                        productModelResponse.getBranchId().equals(branchId) &&
+                        productModelResponse.getStock().equals(stock)
+                )
+                .expectNextCount(0).expectComplete().verify();
     }
 }

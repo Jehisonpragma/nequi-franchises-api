@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import org.yaml.snakeyaml.util.Tuple;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
@@ -65,6 +66,25 @@ public class Handler {
                         .orElseGet(() -> Mono.just("Product id is empty"))
         ).flatMap(response -> ServerResponse.ok().bodyValue(response));
 
+    }
+
+    public Mono<ServerResponse> listenPATCHProductStockUseCase(ServerRequest serverRequest) {
+
+        Optional<Integer> optProductId = serverRequest.queryParam("id").map(Integer::parseInt);
+        Optional<Integer> optStock = serverRequest.queryParam("stock").map(Integer::parseInt);
+
+        if (optProductId.isPresent() && optStock.isPresent()) {
+            return Mono.just(new Tuple<>(optProductId.get(), optStock.get()))
+                    .flatMap(integerIntegerTuple -> {
+                        Integer productId = integerIntegerTuple._1();
+                        Integer stock = integerIntegerTuple._2();
+
+                        return productUseCase.modifyStockInProduct(productId, stock)
+                                .flatMap(productModel -> ServerResponse.ok().bodyValue(productModel));
+                    });
+        } else {
+            return ServerResponse.ok().bodyValue("Insufficient query parameters");
+        }
     }
 
 }

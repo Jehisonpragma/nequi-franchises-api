@@ -25,7 +25,7 @@ public class ProductRepositoryAdapter extends ReactiveAdapterOperations<
     }
 
     @Override
-    public Mono<ProductModel> createProduct(ProductModel productModel) {
+    public Mono<ProductModel> saveProduct(ProductModel productModel) {
 
         return Mono.just(productModel)
                 .map(this::toData)
@@ -37,8 +37,18 @@ public class ProductRepositoryAdapter extends ReactiveAdapterOperations<
     }
 
     @Override
+    public Mono<ProductModel> getProductById(Integer productId) {
+        return Mono.just(productId)
+                .flatMap(productIdProcessed ->
+                        this.repository.findById(productIdProcessed)
+                                .map(this::toEntity)
+                );
+    }
+
+    @Override
     public Mono<Boolean> deleteProductById(Integer productId) {
         return this.repository.deleteById(productId)
                 .thenReturn(Boolean.TRUE);
     }
+
 }

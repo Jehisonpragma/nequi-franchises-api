@@ -15,6 +15,7 @@ public class RouterRest {
         return route(POST("/api/franchise"), handler::listenPOSTFranchiseUseCase)
                 .and(route(POST("/api/branch"), handler::listenPOSTBranchUseCase))
                 .and(route(POST("/api/product"), handler::listenPOSTProductUseCase))
-                .and(route(DELETE("/api/product"), handler::listenDELETEProductUseCase));
+                .and(route(DELETE("/api/product"), handler::listenDELETEProductUseCase))
+                .and(route(PATCH("/api/product/stock"), handler::listenPATCHProductStockUseCase));
     }
 }
