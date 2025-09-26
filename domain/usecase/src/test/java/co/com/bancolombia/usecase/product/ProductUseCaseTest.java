@@ -2,6 +2,7 @@ package co.com.bancolombia.usecase.product;
 
 import co.com.bancolombia.model.productmodel.ProductModel;
 import co.com.bancolombia.model.productmodel.gateways.ProductModelRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -45,5 +46,22 @@ class ProductUseCaseTest {
                                 productModel.getStock().equals(stock)
                 )
                 .expectNextCount(0);
+    }
+
+
+    @Test
+    void testDeleteProduct() {
+        Integer productId = 1;
+
+        when(productModelRepository.deleteProductById(productId)).thenReturn(Mono.just(Boolean.TRUE));
+
+        Mono<Boolean> result = productUseCase.deleteProduct(productId);
+
+        StepVerifier.create(result)
+                .expectSubscription()
+                .expectNextMatches(response -> {
+                    Assertions.assertTrue( response);
+                    return true;
+                }).expectComplete().verify();
     }
 }

@@ -44,4 +44,17 @@ class ProductRepositoryAdapterTest {
                 .expectNextMatches(value -> value.equals(outcommingProductModel))
                 .verifyComplete();
     }
+
+    @Test
+    void testDeleteProduct() {
+        Integer productId = 1;
+
+        when(repository.deleteById(productId)).thenReturn(Mono.empty());
+
+        Mono<Boolean> result = repositoryAdapter.deleteProductById(productId);
+
+        StepVerifier.create(result)
+                .expectNextMatches(value -> value.equals(Boolean.TRUE))
+                .verifyComplete();
+    }
 }

@@ -5,4 +5,5 @@ import reactor.core.publisher.Mono;
 
 public interface ProductModelRepository {
     Mono<ProductModel> createProduct(ProductModel productModel);
+    Mono<Boolean> deleteProductById(Integer productId);
 }

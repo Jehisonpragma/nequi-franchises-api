@@ -14,4 +14,9 @@ public class ProductUseCase {
         ProductModel productModel = ProductModel.builder().branchId(branchId).name(name).stock(stock).build();
         return productModelRepository.createProduct(productModel);
     }
+
+    public Mono<Boolean> deleteProduct(Integer productId) {
+        return Mono.just(productId)
+                .flatMap(productModelRepository::deleteProductById);
+    }
 }
