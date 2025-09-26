@@ -12,11 +12,21 @@ public class ProductUseCase {
 
     public Mono<ProductModel> createProduct(String name, Integer branchId, Integer stock){
         ProductModel productModel = ProductModel.builder().branchId(branchId).name(name).stock(stock).build();
-        return productModelRepository.createProduct(productModel);
+        return productModelRepository.saveProduct(productModel);
     }
 
     public Mono<Boolean> deleteProduct(Integer productId) {
         return Mono.just(productId)
                 .flatMap(productModelRepository::deleteProductById);
+    }
+
+    public Mono<ProductModel> modifyStockInProduct(Integer productId, Integer stock){
+
+        return Mono.just(productId).flatMap( productIdReceived ->
+                productModelRepository.getProductById(productIdReceived).flatMap(productModel -> {
+                    productModel.setStock(stock);
+                    return productModelRepository.saveProduct(productModel);
+                })
+        );
     }
 }

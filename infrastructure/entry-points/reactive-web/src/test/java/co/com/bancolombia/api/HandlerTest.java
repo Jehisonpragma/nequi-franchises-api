@@ -115,10 +115,35 @@ class HandlerTest {
                 .uri(URI.create("/api/product"))
                 .header("X-Test", "123")
                 .queryParam("id",productId).build();
-//                .body(Mono.just(""));
 
         when(productUseCase.deleteProduct(productIdInt)).thenReturn(Mono.just(Boolean.TRUE));
         create(handler.listenDELETEProductUseCase(request)).expectSubscription().expectNextMatches(response -> {
+            Assertions.assertEquals(HttpStatusCode.valueOf(200),response.statusCode());
+            return true;
+        }).expectComplete().verify();
+    }
+
+    @Test
+    void listenPATCHProductStockUseCase() {
+        String productId = "1";
+        String stock = "20";
+        Integer productIdInt = 1;
+        Integer stockInt = 20;
+        Integer branchId = 2;
+        String productName = "product1";
+
+        ProductModel productModel = ProductModel.builder().productId(1).branchId(branchId).stock(stockInt).name(productName).build();
+
+        ServerRequest request = MockServerRequest.builder()
+                .method(HttpMethod.PATCH)
+                .uri(URI.create("/api/product/stock"))
+                .header("X-Test", "123")
+                .queryParam("id",productId)
+                .queryParam("stock",stock)
+                .build();
+
+        when(productUseCase.modifyStockInProduct(productIdInt,stockInt)).thenReturn(Mono.just(productModel));
+        create(handler.listenPATCHProductStockUseCase(request)).expectSubscription().expectNextMatches(response -> {
             Assertions.assertEquals(HttpStatusCode.valueOf(200),response.statusCode());
             return true;
         }).expectComplete().verify();

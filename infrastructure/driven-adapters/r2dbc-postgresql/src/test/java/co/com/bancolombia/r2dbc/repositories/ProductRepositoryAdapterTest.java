@@ -28,7 +28,7 @@ class ProductRepositoryAdapterTest {
     ObjectMapper mapper;
 
     @Test
-    void testCreateProduct() {
+    void testSaveProduct() {
         ProductEntity incomingProductEntity = ProductEntity.builder().name("product1").branchId(1).stock(20).build();
         ProductEntity outcomingProductEntity = ProductEntity.builder().productId(1).name("product1").branchId(1).stock(20).build();
         ProductModel incomingProductModel = ProductModel.builder().name("product1").branchId(1).stock(20).build();
@@ -38,7 +38,24 @@ class ProductRepositoryAdapterTest {
         when(repository.save(incomingProductEntity)).thenReturn(Mono.just(outcomingProductEntity));
         when(mapper.map(outcomingProductEntity, ProductModel.class)).thenReturn(outcommingProductModel);
 
-        Mono<ProductModel> result = repositoryAdapter.createProduct(incomingProductModel);
+        Mono<ProductModel> result = repositoryAdapter.saveProduct(incomingProductModel);
+
+        StepVerifier.create(result)
+                .expectNextMatches(value -> value.equals(outcommingProductModel))
+                .verifyComplete();
+    }
+
+    @Test
+    void testGetProduct() {
+
+        Integer productId = 1;
+        ProductEntity outcomingProductEntity = ProductEntity.builder().productId(1).name("product1").branchId(1).stock(20).build();
+        ProductModel outcommingProductModel = ProductModel.builder().productId(1).name("product1").branchId(1).stock(20).build();
+
+        when(repository.findById(productId)).thenReturn(Mono.just(outcomingProductEntity));
+        when(mapper.map(outcomingProductEntity, ProductModel.class)).thenReturn(outcommingProductModel);
+
+        Mono<ProductModel> result = repositoryAdapter.getProductById(productId);
 
         StepVerifier.create(result)
                 .expectNextMatches(value -> value.equals(outcommingProductModel))
