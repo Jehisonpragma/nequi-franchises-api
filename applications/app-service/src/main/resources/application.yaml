@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8081
 spring:
   application:
     name: "nequi-franchises-api"
@@ -22,3 +22,12 @@ management:
         enabled: true
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080"
+
+adapters:
+  r2dbc:
+    host: localhost
+    port: 5432
+    database: postgres
+    schema: public
+    username: postgres
+    password: somePassword
