@@ -2,8 +2,10 @@ package co.com.bancolombia.api;
 
 import co.com.bancolombia.api.dto.RequestCreateBranchDto;
 import co.com.bancolombia.api.dto.RequestCreateFranchiseDto;
+import co.com.bancolombia.api.dto.RequestCreateProductDto;
 import co.com.bancolombia.usecase.branch.BranchUseCase;
 import co.com.bancolombia.usecase.franchise.FranchiseUseCase;
+import co.com.bancolombia.usecase.product.ProductUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -16,6 +18,7 @@ public class Handler {
 
     private final FranchiseUseCase franchiseUseCase;
     private final BranchUseCase branchUseCase;
+    private final ProductUseCase productUseCase;
 
     public Mono<ServerResponse> listenPOSTFranchiseUseCase(ServerRequest serverRequest) {
 
@@ -34,6 +37,17 @@ public class Handler {
 
         return bodyMono.flatMap(body ->
                 branchUseCase.createBranch(body.getName(), body.getFranchiseId()).flatMap(response ->
+                        ServerResponse.ok().bodyValue(response)
+                )
+        );
+    }
+
+    public Mono<ServerResponse> listenPOSTProductUseCase(ServerRequest serverRequest) {
+
+        Mono<RequestCreateProductDto> bodyMono = serverRequest.bodyToMono(RequestCreateProductDto.class);
+
+        return bodyMono.flatMap(body ->
+                productUseCase.createProduct(body.getName(), body.getBranchId(), body.getStock()).flatMap(response ->
                         ServerResponse.ok().bodyValue(response)
                 )
         );

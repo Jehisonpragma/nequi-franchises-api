@@ -2,10 +2,13 @@ package co.com.bancolombia.api;
 
 import co.com.bancolombia.api.dto.RequestCreateBranchDto;
 import co.com.bancolombia.api.dto.RequestCreateFranchiseDto;
+import co.com.bancolombia.api.dto.RequestCreateProductDto;
 import co.com.bancolombia.model.branchmodel.BranchModel;
 import co.com.bancolombia.model.franchisemodel.FranchiseModel;
+import co.com.bancolombia.model.productmodel.ProductModel;
 import co.com.bancolombia.usecase.branch.BranchUseCase;
 import co.com.bancolombia.usecase.franchise.FranchiseUseCase;
+import co.com.bancolombia.usecase.product.ProductUseCase;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,6 +33,8 @@ class HandlerTest {
     private FranchiseUseCase franchiseUseCase;
     @Mock
     private BranchUseCase branchUseCase;
+    @Mock
+    private ProductUseCase productUseCase;
     @InjectMocks
     private Handler handler;
 
@@ -37,7 +42,8 @@ class HandlerTest {
     void setUp() {
         franchiseUseCase = Mockito.mock(FranchiseUseCase.class);
         branchUseCase = Mockito.mock(BranchUseCase.class);
-        handler = new Handler(franchiseUseCase,branchUseCase);
+        productUseCase = Mockito.mock(ProductUseCase.class);
+        handler = new Handler(franchiseUseCase,branchUseCase,productUseCase);
     }
 
     @Test
@@ -74,6 +80,27 @@ class HandlerTest {
 
         when(branchUseCase.createBranch(branchName,franchiseId)).thenReturn(Mono.just(branchModel));
         create(handler.listenPOSTBranchUseCase(request)).expectSubscription().expectNextMatches(response -> {
+            Assertions.assertEquals(HttpStatusCode.valueOf(200),response.statusCode());
+            return true;
+        }).expectComplete().verify();
+    }
+
+    @Test
+    void listenPOSTProductUseCase() {
+        String productName = "Product";
+        Integer branchId = 1;
+        Integer stock = 1;
+        ProductModel productModel = ProductModel.builder().productId(1).branchId(branchId).stock(stock).name(productName).build();
+        RequestCreateProductDto requestCreateProductDto = new RequestCreateProductDto(productName,branchId,stock);
+
+        ServerRequest request = MockServerRequest.builder()
+                .method(HttpMethod.POST)
+                .uri(URI.create("/api/product"))
+                .header("X-Test", "123")
+                .body(Mono.just(requestCreateProductDto));
+
+        when(productUseCase.createProduct(productName,branchId,stock)).thenReturn(Mono.just(productModel));
+        create(handler.listenPOSTProductUseCase(request)).expectSubscription().expectNextMatches(response -> {
             Assertions.assertEquals(HttpStatusCode.valueOf(200),response.statusCode());
             return true;
         }).expectComplete().verify();
