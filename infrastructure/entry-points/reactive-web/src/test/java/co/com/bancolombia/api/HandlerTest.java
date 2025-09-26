@@ -1,7 +1,10 @@
 package co.com.bancolombia.api;
 
+import co.com.bancolombia.api.dto.RequestCreateBranchDto;
 import co.com.bancolombia.api.dto.RequestCreateFranchiseDto;
+import co.com.bancolombia.model.branchmodel.BranchModel;
 import co.com.bancolombia.model.franchisemodel.FranchiseModel;
+import co.com.bancolombia.usecase.branch.BranchUseCase;
 import co.com.bancolombia.usecase.franchise.FranchiseUseCase;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,13 +28,16 @@ class HandlerTest {
 
     @Mock
     private FranchiseUseCase franchiseUseCase;
+    @Mock
+    private BranchUseCase branchUseCase;
     @InjectMocks
     private Handler handler;
 
     @BeforeEach
     void setUp() {
         franchiseUseCase = Mockito.mock(FranchiseUseCase.class);
-        handler = new Handler(franchiseUseCase);
+        branchUseCase = Mockito.mock(BranchUseCase.class);
+        handler = new Handler(franchiseUseCase,branchUseCase);
     }
 
     @Test
@@ -48,6 +54,26 @@ class HandlerTest {
 
         when(franchiseUseCase.createFranchise(franchiseName)).thenReturn(Mono.just(franchiseModel));
         create(handler.listenPOSTFranchiseUseCase(request)).expectSubscription().expectNextMatches(response -> {
+            Assertions.assertEquals(HttpStatusCode.valueOf(200),response.statusCode());
+            return true;
+        }).expectComplete().verify();
+    }
+
+    @Test
+    void listenPOSTBranchUseCase() {
+        String branchName = "Branch";
+        Integer franchiseId = 1;
+        BranchModel branchModel = BranchModel.builder().branchId(1).franchiseId(franchiseId).name(branchName).build();
+        RequestCreateBranchDto requestCreateBranchDto = new RequestCreateBranchDto(branchName,franchiseId);
+
+        ServerRequest request = MockServerRequest.builder()
+                .method(HttpMethod.POST)
+                .uri(URI.create("/api/branch"))
+                .header("X-Test", "123")
+                .body(Mono.just(requestCreateBranchDto));
+
+        when(branchUseCase.createBranch(branchName,franchiseId)).thenReturn(Mono.just(branchModel));
+        create(handler.listenPOSTBranchUseCase(request)).expectSubscription().expectNextMatches(response -> {
             Assertions.assertEquals(HttpStatusCode.valueOf(200),response.statusCode());
             return true;
         }).expectComplete().verify();
