@@ -105,4 +105,22 @@ class HandlerTest {
             return true;
         }).expectComplete().verify();
     }
+
+    @Test
+    void listenDELETEProductUseCase() {
+        String productId = "1";
+        Integer productIdInt = 1;
+        ServerRequest request = MockServerRequest.builder()
+                .method(HttpMethod.DELETE)
+                .uri(URI.create("/api/product"))
+                .header("X-Test", "123")
+                .queryParam("id",productId).build();
+//                .body(Mono.just(""));
+
+        when(productUseCase.deleteProduct(productIdInt)).thenReturn(Mono.just(Boolean.TRUE));
+        create(handler.listenDELETEProductUseCase(request)).expectSubscription().expectNextMatches(response -> {
+            Assertions.assertEquals(HttpStatusCode.valueOf(200),response.statusCode());
+            return true;
+        }).expectComplete().verify();
+    }
 }

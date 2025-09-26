@@ -12,6 +12,8 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
+import java.util.Optional;
+
 @Component
 @RequiredArgsConstructor
 public class Handler {
@@ -51,6 +53,18 @@ public class Handler {
                         ServerResponse.ok().bodyValue(response)
                 )
         );
+    }
+
+    public Mono<ServerResponse> listenDELETEProductUseCase(ServerRequest serverRequest) {
+
+        Optional<Integer> optProductId = serverRequest.queryParam("id").map(Integer::parseInt);
+
+        return Mono.just(optProductId).flatMap(optProductIdProcessed ->
+                optProductId.map(productId ->
+                        productUseCase.deleteProduct(productId).thenReturn("Product deleted successfully"))
+                        .orElseGet(() -> Mono.just("Product id is empty"))
+        ).flatMap(response -> ServerResponse.ok().bodyValue(response));
+
     }
 
 }

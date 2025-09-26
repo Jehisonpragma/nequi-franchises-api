@@ -35,4 +35,10 @@ public class ProductRepositoryAdapter extends ReactiveAdapterOperations<
                 );
 
     }
+
+    @Override
+    public Mono<Boolean> deleteProductById(Integer productId) {
+        return this.repository.deleteById(productId)
+                .thenReturn(Boolean.TRUE);
+    }
 }
