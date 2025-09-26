@@ -1,15 +1,15 @@
-package co.com.bancolombia.r2dbc;
+package co.com.bancolombia.r2dbc.repositories;
 
 import co.com.bancolombia.model.franchisemodel.FranchiseModel;
 import co.com.bancolombia.r2dbc.entities.FranchiseEntity;
+import co.com.bancolombia.r2dbc.repositories.franchise.FranchiseRepository;
+import co.com.bancolombia.r2dbc.repositories.franchise.FranchiseRepositoryAdapter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.reactivecommons.utils.ObjectMapper;
-import org.springframework.data.domain.Example;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
