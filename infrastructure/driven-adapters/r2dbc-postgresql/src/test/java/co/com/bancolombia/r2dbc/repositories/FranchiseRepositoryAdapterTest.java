@@ -28,59 +28,6 @@ class FranchiseRepositoryAdapterTest {
     @Mock
     ObjectMapper mapper;
 
-//    @Test
-//    void mustFindValueById() {
-//
-//        when(repository.findById("1")).thenReturn(Mono.just("test"));
-//        when(mapper.map("test", Object.class)).thenReturn("test");
-//
-//        Mono<Object> result = repositoryAdapter.findById("1");
-//
-//        StepVerifier.create(result)
-//                .expectNextMatches(value -> value.equals("test"))
-//                .verifyComplete();
-//    }
-//
-//    @Test
-//    void mustFindAllValues() {
-//        when(repository.findAll()).thenReturn(Flux.just("test"));
-//        when(mapper.map("test", Object.class)).thenReturn("test");
-//
-//        Flux<Object> result = repositoryAdapter.findAll();
-//
-//        StepVerifier.create(result)
-//                .expectNextMatches(value -> value.equals("test"))
-//                .verifyComplete();
-//    }
-//
-//    @Test
-//    void mustFindByExample() {
-//        when(repository.findAll(any(Example.class))).thenReturn(Flux.just("test"));
-//        when(mapper.map("test", Object.class)).thenReturn("test");
-//
-//        Flux<Object> result = repositoryAdapter.findByExample("test");
-//
-//        StepVerifier.create(result)
-//                .expectNextMatches(value -> value.equals("test"))
-//                .verifyComplete();
-//    }
-
-//    @Test
-//    void mustSaveValue() {
-//        FranchiseEntity franchiseEntity = FranchiseEntity.builder().franchiseId(1).name("Franqui").build();
-//        FranchiseModel franchiseModel = FranchiseModel.builder().name("Franqui").build();
-//
-//        when(repository.save(franchiseEntity)).thenReturn(Mono.just(franchiseEntity));
-//        when(mapper.map(franchiseEntity, FranchiseModel.class)).thenReturn(franchiseModel);
-//        when(mapper.map(franchiseModel, FranchiseEntity.class)).thenReturn(franchiseEntity);
-//
-//        Mono<FranchiseModel> result = repositoryAdapter.save(franchiseModel);
-//
-//        StepVerifier.create(result)
-//                .expectNextMatches(value -> value.equals(franchiseModel))
-//                .verifyComplete();
-//    }
-
     @Test
     void testCreateFranchise() {
         FranchiseEntity incomingFranchiseEntity = FranchiseEntity.builder().name("Franqui").build();
@@ -97,5 +44,22 @@ class FranchiseRepositoryAdapterTest {
         StepVerifier.create(result)
                 .expectNextMatches(value -> value.equals(outcommingFranchiseModel))
                 .verifyComplete();
+    }
+
+    @Test
+    void testFindFranchiseById() {
+        Integer franchiseId = 1;
+        FranchiseEntity franchiseEntity = FranchiseEntity.builder().franchiseId(1).name("Franqui").build();
+        FranchiseModel franchiseModel = FranchiseModel.builder().franchiseId(1).name("Franqui").build();
+
+        when(repository.findById(franchiseId)).thenReturn(Mono.just(franchiseEntity));
+        when(mapper.map(franchiseEntity, FranchiseModel.class)).thenReturn(franchiseModel);
+
+        Mono<FranchiseModel> result = repositoryAdapter.findFranchiseById(franchiseId);
+
+        StepVerifier.create(result)
+                .expectSubscription()
+                .expectNextMatches(value -> value.equals(franchiseModel))
+                .expectComplete().verify();
     }
 }

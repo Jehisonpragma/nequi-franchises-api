@@ -7,4 +7,5 @@ public interface ProductModelRepository {
     Mono<ProductModel> saveProduct(ProductModel productModel);
     Mono<ProductModel> getProductById(Integer productId);
     Mono<Boolean> deleteProductById(Integer productId);
+    Mono<ProductModel> findMaxStockProductByBranchId(Integer branchId);
 }

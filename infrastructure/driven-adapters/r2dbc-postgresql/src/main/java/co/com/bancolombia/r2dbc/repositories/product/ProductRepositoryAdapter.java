@@ -51,4 +51,10 @@ public class ProductRepositoryAdapter extends ReactiveAdapterOperations<
                 .thenReturn(Boolean.TRUE);
     }
 
+    @Override
+    public Mono<ProductModel> findMaxStockProductByBranchId(Integer branchId) {
+        return this.repository.findMaxStockProductByBranchId(branchId)
+                .map(this::toEntity);
+    }
+
 }
