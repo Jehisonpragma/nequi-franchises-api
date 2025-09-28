@@ -1,5 +1,8 @@
 package co.com.bancolombia.usecase.product;
 
+import co.com.bancolombia.model.branchmodel.gateways.BranchModelRepository;
+import co.com.bancolombia.model.exceptionmodel.BusinessException;
+import co.com.bancolombia.model.exceptionmodel.ErrorCode;
 import co.com.bancolombia.model.productmodel.ProductModel;
 import co.com.bancolombia.model.productmodel.gateways.ProductModelRepository;
 import lombok.RequiredArgsConstructor;
@@ -9,24 +12,31 @@ import reactor.core.publisher.Mono;
 public class ProductUseCase {
 
     private final ProductModelRepository productModelRepository;
+    private final BranchModelRepository branchModelRepository;
 
     public Mono<ProductModel> createProduct(String name, Integer branchId, Integer stock){
         ProductModel productModel = ProductModel.builder().branchId(branchId).name(name).stock(stock).build();
-        return productModelRepository.saveProduct(productModel);
+
+        return branchModelRepository.findBranchById(branchId).hasElement()
+                .flatMap(hasBranch -> Boolean.TRUE.equals(hasBranch)
+                ? productModelRepository.saveProduct(productModel)
+                : Mono.error(new BusinessException(ErrorCode.E422001)));
     }
 
     public Mono<Boolean> deleteProduct(Integer productId) {
-        return Mono.just(productId)
-                .flatMap(productModelRepository::deleteProductById);
+        return productModelRepository.getProductById(productId).hasElement()
+                .flatMap(hasProduct -> Boolean.TRUE.equals(hasProduct)
+                        ? productModelRepository.deleteProductById(productId)
+                        : Mono.error(new BusinessException(ErrorCode.E422002)));
     }
 
     public Mono<ProductModel> modifyStockInProduct(Integer productId, Integer stock){
 
-        return Mono.just(productId).flatMap( productIdReceived ->
-                productModelRepository.getProductById(productIdReceived).flatMap(productModel -> {
+        return productModelRepository.getProductById(productId)
+                .switchIfEmpty(Mono.error(new BusinessException(ErrorCode.E422002)))
+                .flatMap(productModel -> {
                     productModel.setStock(stock);
                     return productModelRepository.saveProduct(productModel);
-                })
-        );
+                });
     }
 }

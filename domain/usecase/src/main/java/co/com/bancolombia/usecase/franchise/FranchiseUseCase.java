@@ -2,6 +2,8 @@ package co.com.bancolombia.usecase.franchise;
 
 import co.com.bancolombia.model.branchmodel.BranchWithMaxStockProductModel;
 import co.com.bancolombia.model.branchmodel.gateways.BranchModelRepository;
+import co.com.bancolombia.model.exceptionmodel.BusinessException;
+import co.com.bancolombia.model.exceptionmodel.ErrorCode;
 import co.com.bancolombia.model.franchisemodel.FranchiseModel;
 import co.com.bancolombia.model.franchisemodel.FranchiseWithMaxStockProductsModel;
 import co.com.bancolombia.model.franchisemodel.gateways.FranchiseModelRepository;
@@ -24,6 +26,7 @@ public class FranchiseUseCase {
     public Mono<FranchiseWithMaxStockProductsModel> findMaxStockProductsPerEachBranchByFranchiseId(Integer franchiseId){
 
         return franchiseModelRepository.findFranchiseById(franchiseId)
+                .switchIfEmpty(Mono.error(new BusinessException(ErrorCode.E422000)))
                 .flatMap(franchiseModel ->  branchModelRepository.findBranchesByFranchiseId(franchiseId)
                         .flatMap(branchModel -> productModelRepository.findMaxStockProductByBranchId(branchModel.getBranchId())
                                 .flatMap(productModel -> Mono.just(BranchWithMaxStockProductModel.builder()

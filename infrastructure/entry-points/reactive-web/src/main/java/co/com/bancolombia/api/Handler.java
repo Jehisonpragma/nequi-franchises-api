@@ -1,8 +1,10 @@
 package co.com.bancolombia.api;
 
+import co.com.bancolombia.api.dto.ResponseMessageDto;
 import co.com.bancolombia.api.dto.RequestCreateBranchDto;
 import co.com.bancolombia.api.dto.RequestCreateFranchiseDto;
 import co.com.bancolombia.api.dto.RequestCreateProductDto;
+import co.com.bancolombia.model.exceptionmodel.BusinessException;
 import co.com.bancolombia.usecase.branch.BranchUseCase;
 import co.com.bancolombia.usecase.franchise.FranchiseUseCase;
 import co.com.bancolombia.usecase.product.ProductUseCase;
@@ -31,7 +33,7 @@ public class Handler {
             franchiseUseCase.createFranchise(body.getName()).flatMap(response ->
                     ServerResponse.ok().bodyValue(response)
             )
-        );
+        ).onErrorResume(Handler::mapException);
     }
 
     public Mono<ServerResponse> listenPOSTBranchUseCase(ServerRequest serverRequest) {
@@ -42,7 +44,8 @@ public class Handler {
                 branchUseCase.createBranch(body.getName(), body.getFranchiseId()).flatMap(response ->
                         ServerResponse.ok().bodyValue(response)
                 )
-        );
+
+        ).onErrorResume(Handler::mapException);
     }
 
     public Mono<ServerResponse> listenPOSTProductUseCase(ServerRequest serverRequest) {
@@ -53,18 +56,23 @@ public class Handler {
                 productUseCase.createProduct(body.getName(), body.getBranchId(), body.getStock()).flatMap(response ->
                         ServerResponse.ok().bodyValue(response)
                 )
-        );
+        ).onErrorResume(Handler::mapException);
     }
 
     public Mono<ServerResponse> listenDELETEProductUseCase(ServerRequest serverRequest) {
 
         Optional<Integer> optProductId = serverRequest.queryParam("id").map(Integer::parseInt);
 
-        return Mono.just(optProductId).flatMap(optProductIdProcessed ->
-                optProductId.map(productId ->
-                        productUseCase.deleteProduct(productId).thenReturn("Product deleted successfully"))
-                        .orElseGet(() -> Mono.just("Product id is empty"))
-        ).flatMap(response -> ServerResponse.ok().bodyValue(response));
+        return optProductId.map(integer ->
+                        productUseCase.deleteProduct(integer)
+                            .flatMap(isDeleted -> ServerResponse.ok().bodyValue(ResponseMessageDto.builder()
+                                                    .code("200")
+                                                    .message("Product deleted successfully")
+                                                    .build())))
+                .orElseGet(() -> ServerResponse.badRequest().bodyValue(ResponseMessageDto.builder()
+                                .code("400")
+                                .message("Bad Request Error")
+                                .build()));
 
     }
 
@@ -80,10 +88,14 @@ public class Handler {
                         Integer stock = integerIntegerTuple._2();
 
                         return productUseCase.modifyStockInProduct(productId, stock)
-                                .flatMap(productModel -> ServerResponse.ok().bodyValue(productModel));
+                                .flatMap(productModel -> ServerResponse.ok().bodyValue(productModel))
+                                .onErrorResume(Handler::mapException);
                     });
         } else {
-            return ServerResponse.ok().bodyValue("Insufficient query parameters");
+            return ServerResponse.badRequest().bodyValue(ResponseMessageDto.builder()
+                    .code("400")
+                    .message("Bad Request Error")
+                    .build());
         }
     }
 
@@ -91,12 +103,33 @@ public class Handler {
 
         Optional<Integer> optFranchiseId = serverRequest.queryParam("franchise_id").map(Integer::parseInt);
 
-        return Mono.just(optFranchiseId).flatMap(optFranchiseIdProcessed ->
-                optFranchiseIdProcessed.map(productId ->
-                        franchiseUseCase.findMaxStockProductsPerEachBranchByFranchiseId(productId)
-                                .flatMap(response -> ServerResponse.ok().bodyValue(response)))
-                        .orElseGet(() -> ServerResponse.ok().bodyValue("")));
+        return optFranchiseId.map(integer ->
+                    franchiseUseCase.findMaxStockProductsPerEachBranchByFranchiseId(integer)
+                        .flatMap(response -> ServerResponse.ok().bodyValue(response))
+                        .onErrorResume(Handler::mapException))
+                .orElseGet(() -> ServerResponse.badRequest().bodyValue(ResponseMessageDto.builder()
+                                    .code("400")
+                                    .message("Bad Request Error")
+                                    .build()));
+    }
 
+    private static Mono<ServerResponse> mapException(Throwable e) {
+        if (e instanceof IllegalArgumentException) {
+            return ServerResponse.badRequest().bodyValue(ResponseMessageDto.builder()
+                    .code("400")
+                    .message("Bad Request Error")
+                    .build());
+        } else if (e instanceof BusinessException businessException) {
+            return ServerResponse.status(422).bodyValue(ResponseMessageDto.builder()
+                            .code(businessException.getError().getCode())
+                            .message(businessException.getError().getLog())
+                            .build());
+        } else {
+            return ServerResponse.status(500).bodyValue(ResponseMessageDto.builder()
+                    .code("500")
+                    .message("Internal Server Error")
+                    .build());
+        }
     }
 
 }

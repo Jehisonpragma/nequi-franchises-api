@@ -1,5 +1,7 @@
 package co.com.bancolombia.usecase.product;
 
+import co.com.bancolombia.model.branchmodel.BranchModel;
+import co.com.bancolombia.model.branchmodel.gateways.BranchModelRepository;
 import co.com.bancolombia.model.productmodel.ProductModel;
 import co.com.bancolombia.model.productmodel.gateways.ProductModelRepository;
 import org.junit.jupiter.api.Assertions;
@@ -19,13 +21,16 @@ class ProductUseCaseTest {
 
     @Mock
     private ProductModelRepository productModelRepository;
+    @Mock
+    private BranchModelRepository branchModelRepository;
     @InjectMocks
     private ProductUseCase productUseCase;
 
     @BeforeEach
     void setUp() {
         productModelRepository = mock(ProductModelRepository.class);
-        productUseCase = new ProductUseCase(productModelRepository);
+        branchModelRepository = mock(BranchModelRepository.class);
+        productUseCase = new ProductUseCase(productModelRepository,branchModelRepository);
     }
 
     @Test
@@ -34,8 +39,11 @@ class ProductUseCaseTest {
         Integer branchId = 1;
         Integer stock = 20;
 
+        BranchModel branchModel = BranchModel.builder().branchId(branchId).name("branch").build();
+
         ProductModel outcommingProductModel = ProductModel.builder().productId(1).branchId(branchId).name(productName).stock(stock).build();
 
+        when(branchModelRepository.findBranchById(branchId)).thenReturn(Mono.just(branchModel));
         when(productModelRepository.saveProduct(any(ProductModel.class))).thenReturn(Mono.just(outcommingProductModel));
 
         Mono<ProductModel> result = productUseCase.createProduct(productName, branchId,stock);
@@ -54,7 +62,9 @@ class ProductUseCaseTest {
     @Test
     void testDeleteProduct() {
         Integer productId = 1;
+        ProductModel productModel = ProductModel.builder().productId(1).branchId(1).name("product").stock(20).build();
 
+        when(productModelRepository.getProductById(productId)).thenReturn(Mono.just(productModel));
         when(productModelRepository.deleteProductById(productId)).thenReturn(Mono.just(Boolean.TRUE));
 
         Mono<Boolean> result = productUseCase.deleteProduct(productId);

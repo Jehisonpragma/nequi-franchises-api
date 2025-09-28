@@ -38,6 +38,12 @@ public class BranchRepositoryAdapter extends ReactiveAdapterOperations<
     }
 
     @Override
+    public Mono<BranchModel> findBranchById(Integer branchId) {
+        return this.repository.findById(branchId)
+                .map(this::toEntity);
+    }
+
+    @Override
     public Flux<BranchModel> findBranchesByFranchiseId(Integer franchiseId) {
         return this.repository.findBranchesByFranchiseId(franchiseId)
                 .map(this::toEntity);
