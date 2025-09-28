@@ -42,8 +42,9 @@ class BranchRepositoryAdapterTest {
         Mono<BranchModel> result = repositoryAdapter.createBranch(incomingBranchModel);
 
         StepVerifier.create(result)
+                .expectSubscription()
                 .expectNextMatches(value -> value.equals(outcommingBranchModel))
-                .verifyComplete();
+                .expectComplete().verify();
     }
 
     @Test

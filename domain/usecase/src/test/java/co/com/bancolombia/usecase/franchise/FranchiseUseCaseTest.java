@@ -45,7 +45,7 @@ class FranchiseUseCaseTest {
         FranchiseModel incomingFranchiseModel = FranchiseModel.builder().name(franchiseName).build();
         FranchiseModel outcommingFranchiseModel = FranchiseModel.builder().franchiseId(franchiseId).name(franchiseName).build();
 
-        when(franchiseModelRepository.createFranchise(incomingFranchiseModel)).thenReturn(Mono.just(outcommingFranchiseModel));
+        when(franchiseModelRepository.saveFranchise(incomingFranchiseModel)).thenReturn(Mono.just(outcommingFranchiseModel));
 
         Mono<FranchiseModel> result = franchiseUseCase.createFranchise(franchiseName);
 
@@ -54,6 +54,29 @@ class FranchiseUseCaseTest {
                         franchiseModel.getName().equals(franchiseName)
                 )
                 .expectNextCount(0);
+    }
+
+    @Test
+    void testUpdateFranchise() {
+        String franchiseName = "Franchise1";
+        Integer franchiseId = 1;
+
+        FranchiseModel incomingFranchiseModel = FranchiseModel.builder().franchiseId(franchiseId).name(franchiseName).build();
+        FranchiseModel outcommingFranchiseModel = FranchiseModel.builder().franchiseId(franchiseId).name(franchiseName).build();
+
+        when(franchiseModelRepository.findFranchiseById(franchiseId)).thenReturn(Mono.just(incomingFranchiseModel));
+        when(franchiseModelRepository.saveFranchise(incomingFranchiseModel)).thenReturn(Mono.just(outcommingFranchiseModel));
+
+        Mono<FranchiseModel> result = franchiseUseCase.updateFranchiseName(franchiseId,franchiseName);
+
+        StepVerifier.create(result)
+                .expectSubscription()
+                .expectNextMatches(franchiseModel ->
+                        franchiseModel.getFranchiseId().equals(franchiseId) &&
+                        franchiseModel.getName().equals(franchiseName)
+                )
+                .expectNextCount(0)
+                .expectComplete().verify();
     }
 
     @Test

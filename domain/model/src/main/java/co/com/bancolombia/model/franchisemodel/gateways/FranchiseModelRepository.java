@@ -5,6 +5,6 @@ import reactor.core.publisher.Mono;
 
 public interface FranchiseModelRepository {
 
-    Mono<FranchiseModel> createFranchise(FranchiseModel franchiseModel);
+    Mono<FranchiseModel> saveFranchise(FranchiseModel franchiseModel);
     Mono<FranchiseModel> findFranchiseById(Integer franchiseId);
 }

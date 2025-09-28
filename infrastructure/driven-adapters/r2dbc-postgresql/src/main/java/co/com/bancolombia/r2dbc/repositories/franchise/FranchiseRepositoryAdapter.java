@@ -25,7 +25,7 @@ public class FranchiseRepositoryAdapter extends ReactiveAdapterOperations<
     }
 
     @Override
-    public Mono<FranchiseModel> createFranchise(FranchiseModel franchiseModel) {
+    public Mono<FranchiseModel> saveFranchise(FranchiseModel franchiseModel) {
 
         return Mono.just(franchiseModel)
                 .map(this::toData)
