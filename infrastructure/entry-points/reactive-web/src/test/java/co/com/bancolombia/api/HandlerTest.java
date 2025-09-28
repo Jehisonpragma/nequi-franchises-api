@@ -5,6 +5,8 @@ import co.com.bancolombia.api.dto.RequestCreateFranchiseDto;
 import co.com.bancolombia.api.dto.RequestCreateProductDto;
 import co.com.bancolombia.model.branchmodel.BranchModel;
 import co.com.bancolombia.model.branchmodel.BranchWithMaxStockProductModel;
+import co.com.bancolombia.model.exceptionmodel.BusinessException;
+import co.com.bancolombia.model.exceptionmodel.ErrorCode;
 import co.com.bancolombia.model.franchisemodel.FranchiseModel;
 import co.com.bancolombia.model.franchisemodel.FranchiseWithMaxStockProductsModel;
 import co.com.bancolombia.model.productmodel.ProductModel;
@@ -69,6 +71,25 @@ class HandlerTest {
     }
 
     @Test
+    void listenPOSTFranchiseUseCaseWithInternalError() {
+        String franchiseName = "Franchise";
+        FranchiseModel franchiseModel = FranchiseModel.builder().build();
+        RequestCreateFranchiseDto requestCreateFranchiseDto = new RequestCreateFranchiseDto(franchiseName);
+
+        ServerRequest request = MockServerRequest.builder()
+                .method(HttpMethod.POST)
+                .uri(URI.create("/api/franchise"))
+                .header("X-Test", "123")
+                .body(Mono.just("other text"));
+
+        when(franchiseUseCase.createFranchise(franchiseName)).thenReturn(Mono.just(franchiseModel));
+        create(handler.listenPOSTFranchiseUseCase(request)).expectSubscription().expectNextMatches(response -> {
+            Assertions.assertEquals(HttpStatusCode.valueOf(500),response.statusCode());
+            return true;
+        }).expectComplete().verify();
+    }
+
+    @Test
     void listenPOSTBranchUseCase() {
         String branchName = "Branch";
         Integer franchiseId = 1;
@@ -84,6 +105,44 @@ class HandlerTest {
         when(branchUseCase.createBranch(branchName,franchiseId)).thenReturn(Mono.just(branchModel));
         create(handler.listenPOSTBranchUseCase(request)).expectSubscription().expectNextMatches(response -> {
             Assertions.assertEquals(HttpStatusCode.valueOf(200),response.statusCode());
+            return true;
+        }).expectComplete().verify();
+    }
+
+    @Test
+    void listenPOSTBranchUseCaseWithBusinessError() {
+        String branchName = "Branch";
+        Integer franchiseId = 1;
+        RequestCreateBranchDto requestCreateBranchDto = new RequestCreateBranchDto(branchName,franchiseId);
+
+        ServerRequest request = MockServerRequest.builder()
+                .method(HttpMethod.POST)
+                .uri(URI.create("/api/branch"))
+                .header("X-Test", "123")
+                .body(Mono.just(requestCreateBranchDto));
+
+        when(branchUseCase.createBranch(branchName,franchiseId)).thenReturn(Mono.error(new BusinessException(ErrorCode.E422000)));
+        create(handler.listenPOSTBranchUseCase(request)).expectSubscription().expectNextMatches(response -> {
+            Assertions.assertEquals(HttpStatusCode.valueOf(422),response.statusCode());
+            return true;
+        }).expectComplete().verify();
+    }
+
+    @Test
+    void listenPOSTBranchUseCaseWithBadRequestError() {
+        String branchName = "Branch";
+        Integer franchiseId = 1;
+        RequestCreateBranchDto requestCreateBranchDto = new RequestCreateBranchDto(branchName,franchiseId);
+
+        ServerRequest request = MockServerRequest.builder()
+                .method(HttpMethod.POST)
+                .uri(URI.create("/api/branch"))
+                .header("X-Test", "123")
+                .body(Mono.just(requestCreateBranchDto));
+
+        when(branchUseCase.createBranch(branchName,franchiseId)).thenReturn(Mono.error(new IllegalArgumentException()));
+        create(handler.listenPOSTBranchUseCase(request)).expectSubscription().expectNextMatches(response -> {
+            Assertions.assertEquals(HttpStatusCode.valueOf(400),response.statusCode());
             return true;
         }).expectComplete().verify();
     }
@@ -127,6 +186,19 @@ class HandlerTest {
     }
 
     @Test
+    void listenDELETEProductUseCaseWithBadRequestError() {
+        ServerRequest request = MockServerRequest.builder()
+                .method(HttpMethod.DELETE)
+                .uri(URI.create("/api/product"))
+                .header("X-Test", "123").build();
+
+        create(handler.listenDELETEProductUseCase(request)).expectSubscription().expectNextMatches(response -> {
+            Assertions.assertEquals(HttpStatusCode.valueOf(400),response.statusCode());
+            return true;
+        }).expectComplete().verify();
+    }
+
+    @Test
     void listenPATCHProductStockUseCase() {
         String productId = "1";
         String stock = "20";
@@ -148,6 +220,23 @@ class HandlerTest {
         when(productUseCase.modifyStockInProduct(productIdInt,stockInt)).thenReturn(Mono.just(productModel));
         create(handler.listenPATCHProductStockUseCase(request)).expectSubscription().expectNextMatches(response -> {
             Assertions.assertEquals(HttpStatusCode.valueOf(200),response.statusCode());
+            return true;
+        }).expectComplete().verify();
+    }
+
+    @Test
+    void listenPATCHProductStockUseCaseWithBadRequestErrror() {
+        String productId = "1";
+
+        ServerRequest request = MockServerRequest.builder()
+                .method(HttpMethod.PATCH)
+                .uri(URI.create("/api/product/stock"))
+                .header("X-Test", "123")
+                .queryParam("id",productId)
+                .build();
+
+        create(handler.listenPATCHProductStockUseCase(request)).expectSubscription().expectNextMatches(response -> {
+            Assertions.assertEquals(HttpStatusCode.valueOf(400),response.statusCode());
             return true;
         }).expectComplete().verify();
     }
@@ -192,5 +281,21 @@ class HandlerTest {
             Assertions.assertEquals(HttpStatusCode.valueOf(200),response.statusCode());
             return true;
         }).expectComplete().verify();
+    }
+
+    @Test
+    void listenGETFranchiseMaxStockProductUseCaseWithBadRequestError() {
+        ServerRequest request = MockServerRequest.builder()
+                .method(HttpMethod.GET)
+                .uri(URI.create("/api/franchise/branches/products/max-stock"))
+                .header("X-Test", "123")
+                .build();
+
+        create(handler.listenGETFranchiseMaxStockProductUseCase(request))
+                .expectSubscription()
+                .expectNextMatches(response -> {
+                    Assertions.assertEquals(HttpStatusCode.valueOf(400),response.statusCode());
+                    return true;
+                }).expectComplete().verify();
     }
 }

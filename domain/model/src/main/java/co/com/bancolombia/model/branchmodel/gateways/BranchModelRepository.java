@@ -6,5 +6,6 @@ import reactor.core.publisher.Mono;
 
 public interface BranchModelRepository {
     Mono<BranchModel> createBranch(BranchModel branchModel);
+    Mono<BranchModel> findBranchById(Integer branchId);
     Flux<BranchModel> findBranchesByFranchiseId(Integer franchiseId);
 }

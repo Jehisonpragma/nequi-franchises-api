@@ -2,6 +2,9 @@ package co.com.bancolombia.usecase.branch;
 
 import co.com.bancolombia.model.branchmodel.BranchModel;
 import co.com.bancolombia.model.branchmodel.gateways.BranchModelRepository;
+import co.com.bancolombia.model.exceptionmodel.BusinessException;
+import co.com.bancolombia.model.exceptionmodel.ErrorCode;
+import co.com.bancolombia.model.franchisemodel.gateways.FranchiseModelRepository;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -10,9 +13,14 @@ import reactor.core.publisher.Mono;
 public class BranchUseCase {
 
     private final BranchModelRepository branchModelRepository;
+    private final FranchiseModelRepository franchiseModelRepository;
 
     public Mono<BranchModel> createBranch(String name, Integer franchiseId){
         BranchModel branchModel = BranchModel.builder().franchiseId(franchiseId).name(name).build();
-        return branchModelRepository.createBranch(branchModel);
+
+        return franchiseModelRepository.findFranchiseById(franchiseId).hasElement()
+                .flatMap(hasFranchise -> Boolean.TRUE.equals(hasFranchise)
+                    ? branchModelRepository.createBranch(branchModel)
+                    : Mono.error(new BusinessException(ErrorCode.E422000)));
     }
 }
