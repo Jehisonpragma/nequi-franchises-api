@@ -29,7 +29,7 @@ class FranchiseRepositoryAdapterTest {
     ObjectMapper mapper;
 
     @Test
-    void testCreateFranchise() {
+    void testSaveFranchise() {
         FranchiseEntity incomingFranchiseEntity = FranchiseEntity.builder().name("Franqui").build();
         FranchiseEntity outcomingFranchiseEntity = FranchiseEntity.builder().franchiseId(1).name("Franqui").build();
         FranchiseModel incomingFranchiseModel = FranchiseModel.builder().name("Franqui").build();
@@ -39,7 +39,7 @@ class FranchiseRepositoryAdapterTest {
         when(repository.save(incomingFranchiseEntity)).thenReturn(Mono.just(outcomingFranchiseEntity));
         when(mapper.map(outcomingFranchiseEntity, FranchiseModel.class)).thenReturn(outcommingFranchiseModel);
 
-        Mono<FranchiseModel> result = repositoryAdapter.createFranchise(incomingFranchiseModel);
+        Mono<FranchiseModel> result = repositoryAdapter.saveFranchise(incomingFranchiseModel);
 
         StepVerifier.create(result)
                 .expectNextMatches(value -> value.equals(outcommingFranchiseModel))

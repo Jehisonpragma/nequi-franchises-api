@@ -90,6 +90,44 @@ class HandlerTest {
     }
 
     @Test
+    void listenPATCHFranchiseNameUseCase() {
+        String franchiseId = "1";
+        Integer franchiseIdInt = 1;
+        String name = "franchise";
+
+        FranchiseModel franchiseModel = FranchiseModel.builder().franchiseId(franchiseIdInt).name(name).build();
+
+        ServerRequest request = MockServerRequest.builder()
+                .method(HttpMethod.PATCH)
+                .uri(URI.create("/api/franchise/name"))
+                .header("X-Test", "123")
+                .queryParam("id",franchiseId)
+                .queryParam("name",name)
+                .build();
+
+        when(franchiseUseCase.updateFranchiseName(franchiseIdInt,name)).thenReturn(Mono.just(franchiseModel));
+        create(handler.listenPATCHFranchiseNameUseCase(request)).expectSubscription().expectNextMatches(response -> {
+            Assertions.assertEquals(HttpStatusCode.valueOf(200),response.statusCode());
+            return true;
+        }).expectComplete().verify();
+    }
+
+    @Test
+    void listenPATCHFranchiseNameUseCaseWithBadRequest() {
+
+        ServerRequest request = MockServerRequest.builder()
+                .method(HttpMethod.PATCH)
+                .uri(URI.create("/api/franchise/name"))
+                .header("X-Test", "123")
+                .build();
+
+        create(handler.listenPATCHFranchiseNameUseCase(request)).expectSubscription().expectNextMatches(response -> {
+            Assertions.assertEquals(HttpStatusCode.valueOf(400),response.statusCode());
+            return true;
+        }).expectComplete().verify();
+    }
+
+    @Test
     void listenPOSTBranchUseCase() {
         String branchName = "Branch";
         Integer franchiseId = 1;
@@ -225,7 +263,7 @@ class HandlerTest {
     }
 
     @Test
-    void listenPATCHProductStockUseCaseWithBadRequestErrror() {
+    void listenPATCHProductStockUseCaseWithBadRequestError() {
         String productId = "1";
 
         ServerRequest request = MockServerRequest.builder()

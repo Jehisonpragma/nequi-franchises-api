@@ -20,7 +20,17 @@ public class FranchiseUseCase {
 
     public Mono<FranchiseModel> createFranchise(String name){
         FranchiseModel franchiseModel = FranchiseModel.builder().name(name).build();
-        return franchiseModelRepository.createFranchise(franchiseModel);
+        return franchiseModelRepository.saveFranchise(franchiseModel);
+    }
+
+    public Mono<FranchiseModel> updateFranchiseName(Integer franchiseId, String name){
+
+        return franchiseModelRepository.findFranchiseById(franchiseId)
+                .switchIfEmpty(Mono.error(new BusinessException(ErrorCode.E422000)))
+                .flatMap(franchiseModel ->{
+                        franchiseModel.setName(name);
+                        return franchiseModelRepository.saveFranchise(franchiseModel);
+                        });
     }
 
     public Mono<FranchiseWithMaxStockProductsModel> findMaxStockProductsPerEachBranchByFranchiseId(Integer franchiseId){
