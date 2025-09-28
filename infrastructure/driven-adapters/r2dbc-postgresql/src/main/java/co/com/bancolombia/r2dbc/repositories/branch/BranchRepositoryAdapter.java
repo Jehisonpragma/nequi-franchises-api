@@ -6,6 +6,7 @@ import co.com.bancolombia.r2dbc.entities.BranchEntity;
 import co.com.bancolombia.r2dbc.helper.ReactiveAdapterOperations;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Repository
@@ -34,5 +35,11 @@ public class BranchRepositoryAdapter extends ReactiveAdapterOperations<
                                 .map(this::toEntity)
                 );
 
+    }
+
+    @Override
+    public Flux<BranchModel> findBranchesByFranchiseId(Integer franchiseId) {
+        return this.repository.findBranchesByFranchiseId(franchiseId)
+                .map(this::toEntity);
     }
 }

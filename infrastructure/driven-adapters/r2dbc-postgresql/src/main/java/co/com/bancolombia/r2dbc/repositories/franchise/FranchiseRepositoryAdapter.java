@@ -35,4 +35,9 @@ public class FranchiseRepositoryAdapter extends ReactiveAdapterOperations<
                 );
 
     }
+
+    @Override
+    public Mono<FranchiseModel> findFranchiseById(Integer franchiseId) {
+        return this.repository.findById(franchiseId).map(this::toEntity);
+    }
 }

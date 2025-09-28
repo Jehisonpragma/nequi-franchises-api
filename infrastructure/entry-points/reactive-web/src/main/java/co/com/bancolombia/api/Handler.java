@@ -87,4 +87,16 @@ public class Handler {
         }
     }
 
+    public Mono<ServerResponse> listenGETFranchiseMaxStockProductUseCase(ServerRequest serverRequest) {
+
+        Optional<Integer> optFranchiseId = serverRequest.queryParam("franchise_id").map(Integer::parseInt);
+
+        return Mono.just(optFranchiseId).flatMap(optFranchiseIdProcessed ->
+                optFranchiseIdProcessed.map(productId ->
+                        franchiseUseCase.findMaxStockProductsPerEachBranchByFranchiseId(productId)
+                                .flatMap(response -> ServerResponse.ok().bodyValue(response)))
+                        .orElseGet(() -> ServerResponse.ok().bodyValue("")));
+
+    }
+
 }
