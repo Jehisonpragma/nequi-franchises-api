@@ -148,6 +148,44 @@ class HandlerTest {
     }
 
     @Test
+    void listenPATCHBranchNameUseCase() {
+        String branchId = "1";
+        Integer branchIdInt = 1;
+        String name = "branch";
+
+        BranchModel branchModel = BranchModel.builder().branchId(branchIdInt).name(name).build();
+
+        ServerRequest request = MockServerRequest.builder()
+                .method(HttpMethod.PATCH)
+                .uri(URI.create("/api/branch/name"))
+                .header("X-Test", "123")
+                .queryParam("id",branchId)
+                .queryParam("name",name)
+                .build();
+
+        when(branchUseCase.updateBranchName(branchIdInt,name)).thenReturn(Mono.just(branchModel));
+        create(handler.listenPATCHBranchNameUseCase(request)).expectSubscription().expectNextMatches(response -> {
+            Assertions.assertEquals(HttpStatusCode.valueOf(200),response.statusCode());
+            return true;
+        }).expectComplete().verify();
+    }
+
+    @Test
+    void listenPATCHBranchNameUseCaseWithBadRequest() {
+
+        ServerRequest request = MockServerRequest.builder()
+                .method(HttpMethod.PATCH)
+                .uri(URI.create("/api/branch/name"))
+                .header("X-Test", "123")
+                .build();
+
+        create(handler.listenPATCHBranchNameUseCase(request)).expectSubscription().expectNextMatches(response -> {
+            Assertions.assertEquals(HttpStatusCode.valueOf(400),response.statusCode());
+            return true;
+        }).expectComplete().verify();
+    }
+
+    @Test
     void listenPOSTBranchUseCaseWithBusinessError() {
         String branchName = "Branch";
         Integer franchiseId = 1;

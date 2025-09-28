@@ -11,7 +11,6 @@ import org.mockito.Mock;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -44,7 +43,7 @@ class BranchUseCaseTest {
         BranchModel outcommingBranchModel = BranchModel.builder().branchId(1).franchiseId(1).name(branchName).build();
 
         when(franchiseModelRepository.findFranchiseById(franchiseId)).thenReturn(Mono.just(franchiseModel));
-        when(branchModelRepository.createBranch(incomingBranchModel)).thenReturn(Mono.just(outcommingBranchModel));
+        when(branchModelRepository.saveBranch(incomingBranchModel)).thenReturn(Mono.just(outcommingBranchModel));
 
         Mono<BranchModel> result = branchUseCase.createBranch(branchName,franchiseId);
 
@@ -54,6 +53,29 @@ class BranchUseCaseTest {
                         branchModel.getFranchiseId().equals(franchiseId)
                 )
                 .expectNextCount(0);
+    }
+
+    @Test
+    void testUpdateBranch() {
+        String branchName = "Branch1";
+        Integer branchId = 1;
+
+        BranchModel incomingBranchModel = BranchModel.builder().branchId(branchId).name(branchName).build();
+        BranchModel outcommingBranchModel = BranchModel.builder().branchId(branchId).name(branchName).build();
+
+        when(branchModelRepository.findBranchById(branchId)).thenReturn(Mono.just(incomingBranchModel));
+        when(branchModelRepository.saveBranch(incomingBranchModel)).thenReturn(Mono.just(outcommingBranchModel));
+
+        Mono<BranchModel> result = branchUseCase.updateBranchName(branchId,branchName);
+
+        StepVerifier.create(result)
+                .expectSubscription()
+                .expectNextMatches(branchModel ->
+                        branchModel.getBranchId().equals(branchId) &&
+                                branchModel.getName().equals(branchName)
+                )
+                .expectNextCount(0)
+                .expectComplete().verify();
     }
 
 }
