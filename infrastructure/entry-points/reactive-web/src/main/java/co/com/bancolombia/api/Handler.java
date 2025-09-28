@@ -71,6 +71,29 @@ public class Handler {
         ).onErrorResume(Handler::mapException);
     }
 
+    public Mono<ServerResponse> listenPATCHBranchNameUseCase(ServerRequest serverRequest) {
+
+        Optional<Integer> optBranchId = serverRequest.queryParam("id").map(Integer::parseInt);
+        Optional<String> optName = serverRequest.queryParam("name");
+
+        if (optBranchId.isPresent() && optName.isPresent()) {
+            return Mono.just(new Tuple<>(optBranchId.get(), optName.get()))
+                    .flatMap(integerIntegerTuple -> {
+                        Integer branchId = integerIntegerTuple._1();
+                        String name = integerIntegerTuple._2();
+
+                        return branchUseCase.updateBranchName(branchId, name)
+                                .flatMap(productModel -> ServerResponse.ok().bodyValue(productModel))
+                                .onErrorResume(Handler::mapException);
+                    });
+        } else {
+            return ServerResponse.badRequest().bodyValue(ResponseMessageDto.builder()
+                    .code("400")
+                    .message("Bad Request Error")
+                    .build());
+        }
+    }
+
     public Mono<ServerResponse> listenPOSTProductUseCase(ServerRequest serverRequest) {
 
         Mono<RequestCreateProductDto> bodyMono = serverRequest.bodyToMono(RequestCreateProductDto.class);

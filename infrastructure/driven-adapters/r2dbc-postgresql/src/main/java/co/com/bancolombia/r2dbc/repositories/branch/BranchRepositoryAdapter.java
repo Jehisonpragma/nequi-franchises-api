@@ -26,7 +26,7 @@ public class BranchRepositoryAdapter extends ReactiveAdapterOperations<
     }
 
     @Override
-    public Mono<BranchModel> createBranch(BranchModel branchModel) {
+    public Mono<BranchModel> saveBranch(BranchModel branchModel) {
 
         return Mono.just(branchModel)
                 .map(this::toData)

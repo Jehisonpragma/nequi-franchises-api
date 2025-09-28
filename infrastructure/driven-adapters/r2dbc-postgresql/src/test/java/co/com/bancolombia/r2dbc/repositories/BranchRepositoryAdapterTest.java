@@ -29,7 +29,7 @@ class BranchRepositoryAdapterTest {
     ObjectMapper mapper;
 
     @Test
-    void testCreateBranch() {
+    void testSaveBranch() {
         BranchEntity incomingBranchEntity = BranchEntity.builder().name("Franqui").build();
         BranchEntity outcomingBranchEntity = BranchEntity.builder().branchId(1).name("Franqui").build();
         BranchModel incomingBranchModel = BranchModel.builder().name("Franqui").build();
@@ -39,7 +39,7 @@ class BranchRepositoryAdapterTest {
         when(repository.save(incomingBranchEntity)).thenReturn(Mono.just(outcomingBranchEntity));
         when(mapper.map(outcomingBranchEntity, BranchModel.class)).thenReturn(outcommingBranchModel);
 
-        Mono<BranchModel> result = repositoryAdapter.createBranch(incomingBranchModel);
+        Mono<BranchModel> result = repositoryAdapter.saveBranch(incomingBranchModel);
 
         StepVerifier.create(result)
                 .expectSubscription()
