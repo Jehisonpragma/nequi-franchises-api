@@ -58,13 +58,35 @@ class ProductUseCaseTest {
                 .expectNextCount(0).expectComplete().verify();
     }
 
+    @Test
+    void testUpdateProduct() {
+        String productName = "Product1";
+        Integer productId = 1;
+
+        ProductModel incomingProductModel = ProductModel.builder().productId(productId).name(productName).build();
+        ProductModel outcommingProductModel = ProductModel.builder().productId(productId).name(productName).build();
+
+        when(productModelRepository.findProductById(productId)).thenReturn(Mono.just(incomingProductModel));
+        when(productModelRepository.saveProduct(incomingProductModel)).thenReturn(Mono.just(outcommingProductModel));
+
+        Mono<ProductModel> result = productUseCase.updateProductName(productId,productName);
+
+        StepVerifier.create(result)
+                .expectSubscription()
+                .expectNextMatches(productModel ->
+                        productModel.getProductId().equals(productId) &&
+                                productModel.getName().equals(productName)
+                )
+                .expectNextCount(0)
+                .expectComplete().verify();
+    }
 
     @Test
     void testDeleteProduct() {
         Integer productId = 1;
         ProductModel productModel = ProductModel.builder().productId(1).branchId(1).name("product").stock(20).build();
 
-        when(productModelRepository.getProductById(productId)).thenReturn(Mono.just(productModel));
+        when(productModelRepository.findProductById(productId)).thenReturn(Mono.just(productModel));
         when(productModelRepository.deleteProductById(productId)).thenReturn(Mono.just(Boolean.TRUE));
 
         Mono<Boolean> result = productUseCase.deleteProduct(productId);
@@ -86,7 +108,7 @@ class ProductUseCaseTest {
 
         ProductModel productModel = ProductModel.builder().productId(1).branchId(branchId).name(productName).stock(stock).build();
 
-        when(productModelRepository.getProductById(productId)).thenReturn(Mono.just(productModel));
+        when(productModelRepository.findProductById(productId)).thenReturn(Mono.just(productModel));
         when(productModelRepository.saveProduct(productModel)).thenReturn(Mono.just(productModel));
 
         Mono<ProductModel> result = productUseCase.modifyStockInProduct(productId,stock);

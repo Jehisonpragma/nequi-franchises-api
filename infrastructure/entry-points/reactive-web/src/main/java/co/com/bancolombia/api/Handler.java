@@ -105,6 +105,29 @@ public class Handler {
         ).onErrorResume(Handler::mapException);
     }
 
+    public Mono<ServerResponse> listenPATCHProductNameUseCase(ServerRequest serverRequest) {
+
+        Optional<Integer> optProductId = serverRequest.queryParam("id").map(Integer::parseInt);
+        Optional<String> optName = serverRequest.queryParam("name");
+
+        if (optProductId.isPresent() && optName.isPresent()) {
+            return Mono.just(new Tuple<>(optProductId.get(), optName.get()))
+                    .flatMap(integerIntegerTuple -> {
+                        Integer productId = integerIntegerTuple._1();
+                        String name = integerIntegerTuple._2();
+
+                        return productUseCase.updateProductName(productId, name)
+                                .flatMap(productModel -> ServerResponse.ok().bodyValue(productModel))
+                                .onErrorResume(Handler::mapException);
+                    });
+        } else {
+            return ServerResponse.badRequest().bodyValue(ResponseMessageDto.builder()
+                    .code("400")
+                    .message("Bad Request Error")
+                    .build());
+        }
+    }
+
     public Mono<ServerResponse> listenDELETEProductUseCase(ServerRequest serverRequest) {
 
         Optional<Integer> optProductId = serverRequest.queryParam("id").map(Integer::parseInt);

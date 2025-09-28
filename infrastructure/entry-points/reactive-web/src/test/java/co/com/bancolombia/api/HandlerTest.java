@@ -245,6 +245,44 @@ class HandlerTest {
     }
 
     @Test
+    void listenPATCHProductNameUseCase() {
+        String productId = "1";
+        Integer productIdInt = 1;
+        String name = "product";
+
+        ProductModel productModel = ProductModel.builder().productId(productIdInt).name(name).build();
+
+        ServerRequest request = MockServerRequest.builder()
+                .method(HttpMethod.PATCH)
+                .uri(URI.create("/api/product/name"))
+                .header("X-Test", "123")
+                .queryParam("id",productId)
+                .queryParam("name",name)
+                .build();
+
+        when(productUseCase.updateProductName(productIdInt,name)).thenReturn(Mono.just(productModel));
+        create(handler.listenPATCHProductNameUseCase(request)).expectSubscription().expectNextMatches(response -> {
+            Assertions.assertEquals(HttpStatusCode.valueOf(200),response.statusCode());
+            return true;
+        }).expectComplete().verify();
+    }
+
+    @Test
+    void listenPATCHProductNameUseCaseWithBadRequest() {
+
+        ServerRequest request = MockServerRequest.builder()
+                .method(HttpMethod.PATCH)
+                .uri(URI.create("/api/product/name"))
+                .header("X-Test", "123")
+                .build();
+
+        create(handler.listenPATCHProductNameUseCase(request)).expectSubscription().expectNextMatches(response -> {
+            Assertions.assertEquals(HttpStatusCode.valueOf(400),response.statusCode());
+            return true;
+        }).expectComplete().verify();
+    }
+
+    @Test
     void listenDELETEProductUseCase() {
         String productId = "1";
         Integer productIdInt = 1;
