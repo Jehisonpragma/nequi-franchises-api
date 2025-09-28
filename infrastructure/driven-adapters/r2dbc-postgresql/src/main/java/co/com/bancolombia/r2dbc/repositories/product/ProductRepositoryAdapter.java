@@ -37,7 +37,7 @@ public class ProductRepositoryAdapter extends ReactiveAdapterOperations<
     }
 
     @Override
-    public Mono<ProductModel> getProductById(Integer productId) {
+    public Mono<ProductModel> findProductById(Integer productId) {
         return Mono.just(productId)
                 .flatMap(productIdProcessed ->
                         this.repository.findById(productIdProcessed)

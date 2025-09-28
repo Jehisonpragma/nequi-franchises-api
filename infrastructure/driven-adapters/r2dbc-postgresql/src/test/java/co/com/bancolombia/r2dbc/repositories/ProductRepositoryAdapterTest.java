@@ -55,7 +55,7 @@ class ProductRepositoryAdapterTest {
         when(repository.findById(productId)).thenReturn(Mono.just(outcomingProductEntity));
         when(mapper.map(outcomingProductEntity, ProductModel.class)).thenReturn(outcommingProductModel);
 
-        Mono<ProductModel> result = repositoryAdapter.getProductById(productId);
+        Mono<ProductModel> result = repositoryAdapter.findProductById(productId);
 
         StepVerifier.create(result)
                 .expectNextMatches(value -> value.equals(outcommingProductModel))

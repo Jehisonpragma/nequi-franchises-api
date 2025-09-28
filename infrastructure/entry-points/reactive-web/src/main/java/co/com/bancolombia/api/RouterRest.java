@@ -17,6 +17,7 @@ public class RouterRest {
                 .and(route(POST("/api/branch"), handler::listenPOSTBranchUseCase))
                 .and(route(PATCH("/api/branch/name"), handler::listenPATCHBranchNameUseCase))
                 .and(route(POST("/api/product"), handler::listenPOSTProductUseCase))
+                .and(route(PATCH("/api/product/name"), handler::listenPATCHProductNameUseCase))
                 .and(route(DELETE("/api/product"), handler::listenDELETEProductUseCase))
                 .and(route(PATCH("/api/product/stock"), handler::listenPATCHProductStockUseCase))
                 .and(route(GET("/api/franchise/branches/products/max-stock"), handler::listenGETFranchiseMaxStockProductUseCase));

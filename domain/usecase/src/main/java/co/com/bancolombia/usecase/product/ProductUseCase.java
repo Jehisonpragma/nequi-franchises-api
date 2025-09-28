@@ -23,8 +23,18 @@ public class ProductUseCase {
                 : Mono.error(new BusinessException(ErrorCode.E422001)));
     }
 
+    public Mono<ProductModel> updateProductName(Integer productId, String name){
+
+        return productModelRepository.findProductById(productId)
+                .switchIfEmpty(Mono.error(new BusinessException(ErrorCode.E422002)))
+                .flatMap(productModel ->{
+                    productModel.setName(name);
+                    return productModelRepository.saveProduct(productModel);
+                });
+    }
+
     public Mono<Boolean> deleteProduct(Integer productId) {
-        return productModelRepository.getProductById(productId).hasElement()
+        return productModelRepository.findProductById(productId).hasElement()
                 .flatMap(hasProduct -> Boolean.TRUE.equals(hasProduct)
                         ? productModelRepository.deleteProductById(productId)
                         : Mono.error(new BusinessException(ErrorCode.E422002)));
@@ -32,7 +42,7 @@ public class ProductUseCase {
 
     public Mono<ProductModel> modifyStockInProduct(Integer productId, Integer stock){
 
-        return productModelRepository.getProductById(productId)
+        return productModelRepository.findProductById(productId)
                 .switchIfEmpty(Mono.error(new BusinessException(ErrorCode.E422002)))
                 .flatMap(productModel -> {
                     productModel.setStock(stock);
