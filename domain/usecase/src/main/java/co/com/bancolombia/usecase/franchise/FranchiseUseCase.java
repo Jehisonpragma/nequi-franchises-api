@@ -11,6 +11,8 @@ import co.com.bancolombia.model.productmodel.gateways.ProductModelRepository;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
+import java.util.Objects;
+
 @RequiredArgsConstructor
 public class FranchiseUseCase {
 
@@ -19,6 +21,9 @@ public class FranchiseUseCase {
     private final ProductModelRepository productModelRepository;
 
     public Mono<FranchiseModel> createFranchise(String name){
+        if(Objects.isNull(name) || name.isBlank()){
+            return Mono.error(new BusinessException(ErrorCode.E422003));
+        }
         FranchiseModel franchiseModel = FranchiseModel.builder().name(name).build();
         return franchiseModelRepository.saveFranchise(franchiseModel);
     }
