@@ -1,7 +1,6 @@
-FROM eclipse-temurin:17-jdk-alpine
-VOLUME /tmp
-COPY *.jar nequi-franchises-api.jar
-ENV JAVA_OPTS=" -Xshareclasses:name=cacheapp,cacheDir=/cache,nonfatal -XX:+UseContainerSupport -XX:MaxRAMPercentage=70 -Djava.security.egd=file:/dev/./urandom"
-# Replace with a non-root user to avoid running the container with excessive privileges
-USER appuser
-ENTRYPOINT [ "sh", "-c", "java $JAVA_OPTS  -jar nequi-franchises-api.jar" ]
+FROM openjdk:17-alpine@sha256:4b6abae565492dbe9e7a894137c966a7485154238902f2f25e9dbd9784383d81
+EXPOSE 8081
+
+COPY applications/app-service/build/libs/nequi-franchises-api.jar app.jar
+CMD ["/bin/sh"]
+ENTRYPOINT ["java", "-jar","-Duser.timezone=America/Bogota", "/app.jar"]
