@@ -4,6 +4,7 @@ import co.com.bancolombia.model.branchmodel.BranchModel;
 import co.com.bancolombia.model.branchmodel.gateways.BranchModelRepository;
 import co.com.bancolombia.model.franchisemodel.FranchiseModel;
 import co.com.bancolombia.model.franchisemodel.gateways.FranchiseModelRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -11,6 +12,7 @@ import org.mockito.Mock;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -39,20 +41,23 @@ class BranchUseCaseTest {
                 .name("franchise")
                 .build();
 
-        BranchModel incomingBranchModel = BranchModel.builder().name(branchName).build();
         BranchModel outcommingBranchModel = BranchModel.builder().branchId(1).franchiseId(1).name(branchName).build();
 
         when(franchiseModelRepository.findFranchiseById(franchiseId)).thenReturn(Mono.just(franchiseModel));
-        when(branchModelRepository.saveBranch(incomingBranchModel)).thenReturn(Mono.just(outcommingBranchModel));
+        when(branchModelRepository.saveBranch(any(BranchModel.class))).thenReturn(Mono.just(outcommingBranchModel));
 
         Mono<BranchModel> result = branchUseCase.createBranch(branchName,franchiseId);
 
         StepVerifier.create(result)
-                .expectNextMatches(branchModel ->
-                        branchModel.getName().equals(branchName) &&
-                        branchModel.getFranchiseId().equals(franchiseId)
+                .expectSubscription()
+                .expectNextMatches(branchModel -> {
+                            Assertions.assertEquals(branchName,branchModel.getName());
+                            Assertions.assertEquals(franchiseId, branchModel.getFranchiseId());
+                            return true;
+                        }
                 )
-                .expectNextCount(0);
+                .expectNextCount(0)
+                .expectComplete().verify();
     }
 
     @Test

@@ -1,11 +1,11 @@
 package co.com.bancolombia.usecase.franchise;
 
-import co.com.bancolombia.model.branchmodel.BranchWithMaxStockProductModel;
+import co.com.bancolombia.model.reportmaxstocksmodel.BranchWithMaxStockProductModel;
 import co.com.bancolombia.model.branchmodel.gateways.BranchModelRepository;
 import co.com.bancolombia.model.exceptionmodel.BusinessException;
 import co.com.bancolombia.model.exceptionmodel.ErrorCode;
 import co.com.bancolombia.model.franchisemodel.FranchiseModel;
-import co.com.bancolombia.model.franchisemodel.FranchiseWithMaxStockProductsModel;
+import co.com.bancolombia.model.reportmaxstocksmodel.ReportMaxStocksModel;
 import co.com.bancolombia.model.franchisemodel.gateways.FranchiseModelRepository;
 import co.com.bancolombia.model.productmodel.gateways.ProductModelRepository;
 import lombok.RequiredArgsConstructor;
@@ -36,25 +36,5 @@ public class FranchiseUseCase {
                         franchiseModel.setName(name);
                         return franchiseModelRepository.saveFranchise(franchiseModel);
                         });
-    }
-
-    public Mono<FranchiseWithMaxStockProductsModel> findMaxStockProductsPerEachBranchByFranchiseId(Integer franchiseId){
-
-        return franchiseModelRepository.findFranchiseById(franchiseId)
-                .switchIfEmpty(Mono.error(new BusinessException(ErrorCode.E422000)))
-                .flatMap(franchiseModel ->  branchModelRepository.findBranchesByFranchiseId(franchiseId)
-                        .flatMap(branchModel -> productModelRepository.findMaxStockProductByBranchId(branchModel.getBranchId())
-                                .flatMap(productModel -> Mono.just(BranchWithMaxStockProductModel.builder()
-                                        .branchId(branchModel.getBranchId())
-                                        .name(branchModel.getName())
-                                        .maxStockProduct(productModel)
-                                        .build())))
-                        .collectList()
-                        .flatMap(branchMaxStockProductModelList -> Mono.just(FranchiseWithMaxStockProductsModel.builder()
-                                .franchiseId(franchiseId)
-                                .name(franchiseModel.getName())
-                                .branches(branchMaxStockProductModelList)
-                                .build()))
-                );
     }
 }

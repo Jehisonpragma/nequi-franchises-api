@@ -1,6 +1,5 @@
 package co.com.bancolombia.r2dbc.repositories.branch;
 
-import co.com.bancolombia.model.branchmodel.BranchModel;
 import co.com.bancolombia.r2dbc.entities.BranchEntity;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.repository.query.ReactiveQueryByExampleExecutor;
