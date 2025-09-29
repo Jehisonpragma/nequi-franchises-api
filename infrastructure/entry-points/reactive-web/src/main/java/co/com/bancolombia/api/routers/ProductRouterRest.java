@@ -1,12 +1,8 @@
 package co.com.bancolombia.api.routers;
 
-import co.com.bancolombia.api.dto.RequestCreateFranchiseDto;
 import co.com.bancolombia.api.dto.RequestCreateProductDto;
 import co.com.bancolombia.api.dto.ResponseMessageDto;
-import co.com.bancolombia.api.handlers.FranchiseHandler;
 import co.com.bancolombia.api.handlers.ProductHandler;
-import co.com.bancolombia.model.franchisemodel.FranchiseModel;
-import co.com.bancolombia.model.franchisemodel.FranchiseWithMaxStockProductsModel;
 import co.com.bancolombia.model.productmodel.ProductModel;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

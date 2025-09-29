@@ -1,4 +1,4 @@
-package co.com.bancolombia.model.branchmodel;
+package co.com.bancolombia.model.reportmaxstocksmodel;
 import co.com.bancolombia.model.productmodel.ProductModel;
 import lombok.*;
 
