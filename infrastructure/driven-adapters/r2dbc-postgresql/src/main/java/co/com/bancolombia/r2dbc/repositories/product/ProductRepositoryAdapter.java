@@ -2,10 +2,13 @@ package co.com.bancolombia.r2dbc.repositories.product;
 
 import co.com.bancolombia.model.productmodel.ProductModel;
 import co.com.bancolombia.model.productmodel.gateways.ProductModelRepository;
+import co.com.bancolombia.model.reportmaxstocksmodel.BranchWithMaxStockProductModel;
 import co.com.bancolombia.r2dbc.entities.ProductEntity;
+import co.com.bancolombia.r2dbc.entities.ReportMaxStocksEntity;
 import co.com.bancolombia.r2dbc.helper.ReactiveAdapterOperations;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Repository
@@ -51,10 +54,5 @@ public class ProductRepositoryAdapter extends ReactiveAdapterOperations<
                 .thenReturn(Boolean.TRUE);
     }
 
-    @Override
-    public Mono<ProductModel> findMaxStockProductByBranchId(Integer branchId) {
-        return this.repository.findMaxStockProductByBranchId(branchId)
-                .map(this::toEntity);
-    }
 
 }

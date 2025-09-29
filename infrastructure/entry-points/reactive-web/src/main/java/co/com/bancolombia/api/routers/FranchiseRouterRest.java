@@ -4,7 +4,7 @@ import co.com.bancolombia.api.dto.RequestCreateFranchiseDto;
 import co.com.bancolombia.api.dto.ResponseMessageDto;
 import co.com.bancolombia.api.handlers.FranchiseHandler;
 import co.com.bancolombia.model.franchisemodel.FranchiseModel;
-import co.com.bancolombia.model.franchisemodel.FranchiseWithMaxStockProductsModel;
+import co.com.bancolombia.model.reportmaxstocksmodel.ReportMaxStocksModel;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -89,40 +89,10 @@ public class FranchiseRouterRest {
                                             content = @Content(schema = @Schema(implementation = ResponseMessageDto.class)))
                             }
                     )
-            ),
-            @RouterOperation(
-                    path = "/api/franchise/branches/products/max-stock",
-                    produces = { MediaType.APPLICATION_JSON_VALUE },
-                    method = RequestMethod.GET,
-                    beanClass = FranchiseHandler.class,
-                    beanMethod = "listenGETFranchiseMaxStockProductUseCase",
-                    operation = @Operation(
-                            operationId = "GetMaxStockProductInFranchise",
-                            summary = "Get the products with maximum stock per branch for a franchise",
-                            parameters = {
-                                    @Parameter(
-                                            in = ParameterIn.QUERY,
-                                            name = "id",
-                                            required = true,
-                                            description = "Franchise Id"
-                                    )
-                            },
-                            responses = {
-                                    @ApiResponse(responseCode = "200", description = "Successful Operation",
-                                            content = @Content(schema = @Schema(implementation = FranchiseWithMaxStockProductsModel.class))),
-                                    @ApiResponse(responseCode = "400", description = "Bad Request Error",
-                                            content = @Content(schema = @Schema(implementation = ResponseMessageDto.class))),
-                                    @ApiResponse(responseCode = "422", description = "BusinessError",
-                                            content = @Content(schema = @Schema(implementation = ResponseMessageDto.class))),
-                                    @ApiResponse(responseCode = "500", description = "Internal Server Error",
-                                            content = @Content(schema = @Schema(implementation = ResponseMessageDto.class)))
-                            }
-                    )
             )
     })
     public RouterFunction<ServerResponse> franchiseRouterFunction(FranchiseHandler franchiseHandler) {
         return route(POST("/api/franchise"), franchiseHandler::listenPOSTFranchiseUseCase)
-                .and(route(PATCH("/api/franchise/name"), franchiseHandler::listenPATCHFranchiseNameUseCase))
-                .and(route(GET("/api/franchise/branches/products/max-stock"), franchiseHandler::listenGETFranchiseMaxStockProductUseCase));
+                .and(route(PATCH("/api/franchise/name"), franchiseHandler::listenPATCHFranchiseNameUseCase));
     }
 }

@@ -52,18 +52,5 @@ public class FranchiseHandler {
         }
     }
 
-    public Mono<ServerResponse> listenGETFranchiseMaxStockProductUseCase(ServerRequest serverRequest) {
-
-        Optional<Integer> optFranchiseId = serverRequest.queryParam("franchise_id").map(Integer::parseInt);
-
-        return optFranchiseId.map(integer ->
-                    franchiseUseCase.findMaxStockProductsPerEachBranchByFranchiseId(integer)
-                        .flatMap(response -> ServerResponse.ok().bodyValue(response))
-                        .onErrorResume(HandlerUtils::mapException))
-                .orElseGet(() -> ServerResponse.badRequest().bodyValue(ResponseMessageDto.builder()
-                                    .code("400")
-                                    .message("Bad Request Error")
-                                    .build()));
-    }
 
 }

@@ -4,6 +4,7 @@ import co.com.bancolombia.model.branchmodel.BranchModel;
 import co.com.bancolombia.r2dbc.entities.BranchEntity;
 import co.com.bancolombia.r2dbc.repositories.branch.BranchRepository;
 import co.com.bancolombia.r2dbc.repositories.branch.BranchRepositoryAdapter;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -44,6 +45,26 @@ class BranchRepositoryAdapterTest {
         StepVerifier.create(result)
                 .expectSubscription()
                 .expectNextMatches(value -> value.equals(outcommingBranchModel))
+                .expectComplete().verify();
+    }
+
+    @Test
+    void testFindBranchesById() {
+        Integer branchId = 1;
+        BranchEntity branchEntity1 = BranchEntity.builder().branchId(1).name("Franqui1").build();
+        BranchModel branchModel1 = BranchModel.builder().branchId(1).name("Franqui1").build();
+
+        when(repository.findById(branchId)).thenReturn(Mono.just(branchEntity1));
+        when(mapper.map(branchEntity1, BranchModel.class)).thenReturn(branchModel1);
+
+        Mono<BranchModel> result = repositoryAdapter.findBranchById(branchId);
+
+        StepVerifier.create(result)
+                .expectSubscription()
+                .expectNextMatches(value -> {
+                    Assertions.assertEquals(branchModel1,value);
+                    return true;
+                })
                 .expectComplete().verify();
     }
 

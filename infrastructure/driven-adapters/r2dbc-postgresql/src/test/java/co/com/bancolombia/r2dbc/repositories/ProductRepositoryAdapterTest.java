@@ -75,21 +75,21 @@ class ProductRepositoryAdapterTest {
                 .verifyComplete();
     }
 
-    @Test
-    void testFindMaxStockProductByBranchId() {
-
-        Integer branchId = 1;
-        ProductEntity outcomingProductEntity = ProductEntity.builder().productId(1).name("product1").branchId(1).stock(20).build();
-        ProductModel outcommingProductModel = ProductModel.builder().productId(1).name("product1").branchId(1).stock(20).build();
-
-        when(repository.findMaxStockProductByBranchId(branchId)).thenReturn(Mono.just(outcomingProductEntity));
-        when(mapper.map(outcomingProductEntity, ProductModel.class)).thenReturn(outcommingProductModel);
-
-        Mono<ProductModel> result = repositoryAdapter.findMaxStockProductByBranchId(branchId);
-
-        StepVerifier.create(result)
-                .expectSubscription()
-                .expectNextMatches(value -> value.equals(outcommingProductModel))
-                .expectComplete().verify();
-    }
+//    @Test
+//    void testFindMaxStockProductByBranchId() {
+//
+//        Integer branchId = 1;
+//        ProductEntity outcomingProductEntity = ProductEntity.builder().productId(1).name("product1").branchId(1).stock(20).build();
+//        ProductModel outcommingProductModel = ProductModel.builder().productId(1).name("product1").branchId(1).stock(20).build();
+//
+//        when(repository.findMaxStockProductByBranchId(branchId)).thenReturn(Mono.just(outcomingProductEntity));
+//        when(mapper.map(outcomingProductEntity, ProductModel.class)).thenReturn(outcommingProductModel);
+//
+//        Mono<ProductModel> result = repositoryAdapter.findMaxStockProductByBranchId(branchId);
+//
+//        StepVerifier.create(result)
+//                .expectSubscription()
+//                .expectNextMatches(value -> value.equals(outcommingProductModel))
+//                .expectComplete().verify();
+//    }
 }

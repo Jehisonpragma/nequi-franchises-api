@@ -1,5 +1,4 @@
-package co.com.bancolombia.model.franchisemodel;
-import co.com.bancolombia.model.branchmodel.BranchWithMaxStockProductModel;
+package co.com.bancolombia.model.reportmaxstocksmodel;
 import lombok.*;
 
 import java.util.List;
@@ -9,7 +8,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class FranchiseWithMaxStockProductsModel {
+public class ReportMaxStocksModel {
 
     private Integer franchiseId;
     private String name;
