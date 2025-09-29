@@ -11,6 +11,8 @@ spring:
       path: "/h2"
   profiles:
     include: null
+  config:
+    import: "aws-parameterstore:/config/common"
 management:
   endpoints:
     web:
@@ -22,12 +24,3 @@ management:
         enabled: true
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080"
-
-adapters:
-  r2dbc:
-    host: localhost
-    port: 5432
-    database: postgres
-    schema: public
-    username: postgres
-    password: somePassword

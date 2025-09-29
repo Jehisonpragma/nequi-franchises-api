@@ -3,13 +3,16 @@ package co.com.bancolombia.api.handlers;
 import co.com.bancolombia.api.dto.ResponseMessageDto;
 import co.com.bancolombia.model.exceptionmodel.BusinessException;
 import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
 @UtilityClass
+@Slf4j
 public class HandlerUtils {
 
     public static Mono<ServerResponse> mapException(Throwable e) {
+        log.info(e.getMessage());
         if (e instanceof IllegalArgumentException) {
             return ServerResponse.badRequest().bodyValue(ResponseMessageDto.builder()
                     .code("400")
